@@ -44,10 +44,13 @@ export async function createPost(data: {
     tags: string[] // array of tag IDs
     date?: Date
 }) {
+    // Sanitize slug to ensure no spaces or special characters
+    const sanitizedSlug = data.slug.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+
     const post = await prisma.post.create({
         data: {
             title: data.title,
-            slug: data.slug,
+            slug: sanitizedSlug,
             content: data.content,
             summary: data.summary,
             date: data.date || new Date(),
