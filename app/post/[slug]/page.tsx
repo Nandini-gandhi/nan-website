@@ -15,7 +15,8 @@ export default async function PostPage({
     params: Promise<{ slug: string }>
 }) {
     const { slug } = await params
-    const post = await getPost(slug)
+    const decodedSlug = decodeURIComponent(slug)
+    const post = await getPost(decodedSlug)
 
     if (!post) {
         notFound()
