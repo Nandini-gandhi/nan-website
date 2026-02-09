@@ -1,8 +1,4 @@
-import ReactMarkdown from "react-markdown"
-import remarkGfm from "remark-gfm"
-import rehypeRaw from "rehype-raw"
 import { cn } from "@/lib/utils"
-import Image from "next/image"
 
 interface MarkdownViewProps {
     content: string
@@ -27,44 +23,12 @@ export function MarkdownView({ content, className }: MarkdownViewProps) {
                 "prose-ul:my-6 prose-ul:ml-6 prose-ul:list-disc prose-ul:space-y-2",
                 "prose-ol:my-6 prose-ol:ml-6 prose-ol:list-decimal prose-ol:space-y-2",
                 "prose-li:text-gray-700",
-                "prose-img:rounded-lg prose-img:border prose-img:border-gray-200 prose-img:shadow-md prose-img:my-6",
+                "prose-img:rounded-lg prose-img:border prose-img:border-gray-200 prose-img:shadow-md prose-img:my-6 prose-img:max-w-full",
                 "prose-a:text-blue-600 prose-a:underline prose-a:decoration-blue-300 hover:prose-a:text-blue-700",
                 "prose-hr:border-gray-300 prose-hr:my-8",
                 className
             )}
-        >
-            <ReactMarkdown 
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeRaw]}
-                components={{
-                    // Handle images - allow both external and relative URLs
-                    img: ({ node, ...props }) => {
-                        const src = props.src || ""
-                        const alt = props.alt || ""
-                        
-                        // For external images or if width/height not specified, use regular img
-                        return (
-                            <img 
-                                src={src}
-                                alt={alt}
-                                className="rounded-lg border border-gray-200 shadow-md my-6 max-w-full h-auto"
-                                loading="lazy"
-                            />
-                        )
-                    },
-                    // Ensure paragraphs render with proper spacing even if empty
-                    p: ({ node, children, ...props }) => {
-                        // Check if paragraph is empty or just whitespace
-                        const isEmpty = !children || (typeof children === 'string' && !children.trim())
-                        if (isEmpty) {
-                            return <p className="my-4 min-h-[1.5em]">&nbsp;</p>
-                        }
-                        return <p {...props}>{children}</p>
-                    },
-                }}
-            >
-                {content}
-            </ReactMarkdown>
-        </article>
+            dangerouslySetInnerHTML={{ __html: content }}
+        />
     )
 }
