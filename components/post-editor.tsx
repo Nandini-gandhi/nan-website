@@ -64,6 +64,18 @@ export default function PostEditor({ post }: { post?: any }) {
             return
         }
         
+        // Check content size (warn if > 500KB)
+        const contentSize = new Blob([content]).size
+        if (contentSize > 500000) {
+            const continueAnyway = confirm(
+                `Warning: Your post content is quite large (${Math.round(contentSize / 1024)}KB). ` +
+                `This might cause issues. Consider using fewer or smaller images.\n\nContinue anyway?`
+            )
+            if (!continueAnyway) {
+                return
+            }
+        }
+        
         setSaving(true)
         try {
             const postData = {
@@ -87,7 +99,7 @@ export default function PostEditor({ post }: { post?: any }) {
         } catch (error: any) {
             console.error("Error saving post:", error)
             const errorMessage = error?.message || "Unknown error occurred"
-            alert(`Error saving post: ${errorMessage}\n\nTip: If you have large images, try using smaller file sizes or external image URLs.`)
+            alert(`Error saving post: ${errorMessage}\n\nTip: Try reducing the number of images or using smaller file sizes.`)
         } finally {
             setSaving(false)
         }
@@ -172,7 +184,10 @@ export default function PostEditor({ post }: { post?: any }) {
 
                 <div className="grid gap-2">
                     <Label htmlFor="content" className="text-gray-700">Content</Label>
-                    <p className="text-xs text-gray-500 mb-2">Use the toolbar for formatting. Cmd+B for bold, Cmd+I for italic, Cmd+U for underline.</p>
+                    <p className="text-xs text-gray-500 mb-2">
+                        Use the toolbar for formatting. Cmd+B for bold, Cmd+I for italic, Cmd+U for underline. 
+                        Images are automatically compressed for optimal performance.
+                    </p>
                     <RichTextEditor 
                         content={content}
                         onChange={setContent}

@@ -7,9 +7,15 @@ interface MarkdownViewProps {
 
 export function MarkdownView({ content, className }: MarkdownViewProps) {
     // Ensure empty paragraphs are visible
-    const processedContent = content
-        .replace(/<p><\/p>/g, '<p>&nbsp;</p>')
-        .replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>')
+    let processedContent = content
+    try {
+        processedContent = content
+            .replace(/<p><\/p>/g, '<p>&nbsp;</p>')
+            .replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>')
+    } catch (error) {
+        console.error('Error processing content:', error)
+        processedContent = content
+    }
     
     return (
         <article
@@ -34,6 +40,7 @@ export function MarkdownView({ content, className }: MarkdownViewProps) {
                 "[&_img]:max-w-full [&_img]:h-auto",
                 className
             )}
+            suppressHydrationWarning
             dangerouslySetInnerHTML={{ __html: processedContent }}
         />
     )

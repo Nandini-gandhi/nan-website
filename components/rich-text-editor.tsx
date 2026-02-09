@@ -78,8 +78,38 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         if (file) {
                             const reader = new FileReader()
                             reader.onload = (e) => {
-                                const url = e.target?.result as string
-                                editor?.chain().focus().setImage({ src: url }).run()
+                                const img = new window.Image()
+                                img.onload = () => {
+                                    // Compress pasted image
+                                    const canvas = document.createElement('canvas')
+                                    let width = img.width
+                                    let height = img.height
+                                    
+                                    // Max dimensions
+                                    const maxWidth = 1200
+                                    const maxHeight = 1200
+                                    
+                                    if (width > maxWidth || height > maxHeight) {
+                                        if (width > height) {
+                                            height = (height / width) * maxWidth
+                                            width = maxWidth
+                                        } else {
+                                            width = (width / height) * maxHeight
+                                            height = maxHeight
+                                        }
+                                    }
+                                    
+                                    canvas.width = width
+                                    canvas.height = height
+                                    
+                                    const ctx = canvas.getContext('2d')
+                                    ctx?.drawImage(img, 0, 0, width, height)
+                                    
+                                    // Convert to base64 with compression
+                                    const compressedUrl = canvas.toDataURL('image/jpeg', 0.8)
+                                    editor?.chain().focus().setImage({ src: compressedUrl }).run()
+                                }
+                                img.src = e.target?.result as string
                             }
                             reader.readAsDataURL(file)
                         }
@@ -102,10 +132,46 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
         input.onchange = (e) => {
             const file = (e.target as HTMLInputElement).files?.[0]
             if (file) {
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Image is too large. Please use an image smaller than 5MB.')
+                    return
+                }
+                
                 const reader = new FileReader()
                 reader.onload = (e) => {
-                    const url = e.target?.result as string
-                    editor.chain().focus().setImage({ src: url }).run()
+                    const img = new window.Image()
+                    img.onload = () => {
+                        // Compress image if it's large
+                        const canvas = document.createElement('canvas')
+                        let width = img.width
+                        let height = img.height
+                        
+                        // Max dimensions
+                        const maxWidth = 1200
+                        const maxHeight = 1200
+                        
+                        if (width > maxWidth || height > maxHeight) {
+                            if (width > height) {
+                                height = (height / width) * maxWidth
+                                width = maxWidth
+                            } else {
+                                width = (width / height) * maxHeight
+                                height = maxHeight
+                            }
+                        }
+                        
+                        canvas.width = width
+                        canvas.height = height
+                        
+                        const ctx = canvas.getContext('2d')
+                        ctx?.drawImage(img, 0, 0, width, height)
+                        
+                        // Convert to base64 with compression
+                        const compressedUrl = canvas.toDataURL('image/jpeg', 0.8)
+                        editor.chain().focus().setImage({ src: compressedUrl }).run()
+                    }
+                    img.src = e.target?.result as string
                 }
                 reader.readAsDataURL(file)
             }
