@@ -163,12 +163,27 @@ export default function PostEditor({ post }: { post?: any }) {
 
                 <div className="grid gap-2">
                     <Label htmlFor="content" className="text-gray-700">Content (Markdown)</Label>
+                    <div className="text-xs text-gray-500 mb-2 space-y-1">
+                        <p>Markdown formatting guide:</p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-mono bg-gray-50 p-2 rounded">
+                            <span>**bold text**</span>
+                            <span>*italic text*</span>
+                            <span># Heading 1</span>
+                            <span>## Heading 2</span>
+                            <span>[link](url)</span>
+                            <span>![image](url)</span>
+                            <span>`code`</span>
+                            <span>- bullet list</span>
+                        </div>
+                        <p className="mt-2">💡 Use blank lines to create paragraph breaks</p>
+                        <p className="mt-1">🎨 For colors: &lt;span style="color: blue"&gt;blue text&lt;/span&gt;</p>
+                    </div>
                     <Textarea
                         id="content"
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         className="min-h-[400px] font-mono bg-white/80 border-blue-200 text-gray-900"
-                        placeholder="# Today I learned..."
+                        placeholder="# Today I learned...&#10;&#10;This is a paragraph.&#10;&#10;**Bold text** and *italic text* work great!&#10;&#10;Add images: ![alt text](image-url)&#10;&#10;Add colors: <span style='color: blue'>colored text</span>"
                     />
                 </div>
             </div>
