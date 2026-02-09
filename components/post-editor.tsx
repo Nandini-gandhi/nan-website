@@ -56,6 +56,14 @@ export default function PostEditor({ post }: { post?: any }) {
             alert("Title and content are required")
             return
         }
+        
+        // Check if content is just empty HTML
+        const textContent = content.replace(/<[^>]*>/g, '').trim()
+        if (!textContent && !content.includes('<img')) {
+            alert("Please add some content to your post")
+            return
+        }
+        
         setSaving(true)
         try {
             const postData = {
@@ -76,9 +84,10 @@ export default function PostEditor({ post }: { post?: any }) {
             
             router.push("/admin")
             router.refresh()
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error saving post:", error)
-            alert("Error saving post. Check console for details.")
+            const errorMessage = error?.message || "Unknown error occurred"
+            alert(`Error saving post: ${errorMessage}\n\nTip: If you have large images, try using smaller file sizes or external image URLs.`)
         } finally {
             setSaving(false)
         }

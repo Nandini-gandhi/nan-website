@@ -16,7 +16,7 @@ model Post {
   title     String
   slug      String   @unique
   summary   String?
-  content   String
+  content   String   @db.Text
   published Boolean  @default(false)
   date      DateTime @default(now())
   createdAt DateTime @default(now())

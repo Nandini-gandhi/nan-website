@@ -32,13 +32,28 @@ interface RichTextEditorProps {
 export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     const editor = useEditor({
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                paragraph: {
+                    HTMLAttributes: {
+                        class: 'my-2',
+                    },
+                },
+                hardBreak: {
+                    keepMarks: false,
+                },
+            }),
             Image.configure({
-                inline: true,
+                inline: false,
                 allowBase64: true,
+                HTMLAttributes: {
+                    class: 'max-w-full h-auto rounded-lg my-4',
+                },
             }),
             Link.configure({
                 openOnClick: false,
+                HTMLAttributes: {
+                    class: 'text-blue-600 underline',
+                },
             }),
             Underline,
             TextStyle,
@@ -46,11 +61,32 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
         ],
         content,
         onUpdate: ({ editor }) => {
-            onChange(editor.getHTML())
+            const html = editor.getHTML()
+            onChange(html)
         },
         editorProps: {
             attributes: {
                 class: 'prose prose-zinc max-w-none focus:outline-none min-h-[400px] px-4 py-3',
+            },
+            handlePaste: (view, event) => {
+                // Handle image paste
+                const items = Array.from(event.clipboardData?.items || [])
+                for (const item of items) {
+                    if (item.type.indexOf('image') === 0) {
+                        event.preventDefault()
+                        const file = item.getAsFile()
+                        if (file) {
+                            const reader = new FileReader()
+                            reader.onload = (e) => {
+                                const url = e.target?.result as string
+                                editor?.chain().focus().setImage({ src: url }).run()
+                            }
+                            reader.readAsDataURL(file)
+                        }
+                        return true
+                    }
+                }
+                return false
             },
         },
     })
