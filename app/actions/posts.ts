@@ -61,6 +61,48 @@ export async function createPost(data: {
         },
     })
     revalidatePath("/")
+    revalidatePath("/admin")
+    return post
+}
+
+export async function updatePost(id: string, data: {
+    title: string
+    slug: string
+    content: string
+    summary?: string
+    tags: string[] // array of tag IDs
+    date?: Date
+}) {
+    // Sanitize slug to ensure no spaces or special characters
+    const sanitizedSlug = data.slug.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+
+    // First, disconnect all existing tags
+    await prisma.post.update({
+        where: { id },
+        data: {
+            tags: {
+                set: [],
+            },
+        },
+    })
+
+    // Then update the post with new data and tags
+    const post = await prisma.post.update({
+        where: { id },
+        data: {
+            title: data.title,
+            slug: sanitizedSlug,
+            content: data.content,
+            summary: data.summary,
+            date: data.date || new Date(),
+            tags: {
+                connect: data.tags.map((id) => ({ id })),
+            },
+        },
+    })
+    revalidatePath("/")
+    revalidatePath("/admin")
+    revalidatePath(`/post/${sanitizedSlug}`)
     return post
 }
 

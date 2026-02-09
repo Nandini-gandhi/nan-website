@@ -1,6 +1,6 @@
 "use client"
 
-import { createPost } from "@/app/actions/posts"
+import { createPost, updatePost } from "@/app/actions/posts"
 import { createTag, getTags } from "@/app/actions/tags"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -49,16 +49,39 @@ export default function PostEditor({ post }: { post?: any }) {
         setTagInput("")
     }
 
+    const [saving, setSaving] = useState(false)
+
     const handleSubmit = async () => {
-        await createPost({
-            title,
-            slug,
-            content,
-            summary,
-            tags: tags.map(t => t.id),
-        })
-        router.push("/admin")
-        router.refresh()
+        if (!title || !content) {
+            alert("Title and content are required")
+            return
+        }
+        setSaving(true)
+        try {
+            const postData = {
+                title,
+                slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+                content,
+                summary,
+                tags: tags.map(t => t.id),
+            }
+
+            if (post?.id) {
+                // Update existing post
+                await updatePost(post.id, postData)
+            } else {
+                // Create new post
+                await createPost(postData)
+            }
+            
+            router.push("/admin")
+            router.refresh()
+        } catch (error) {
+            console.error("Error saving post:", error)
+            alert("Error saving post. Check console for details.")
+        } finally {
+            setSaving(false)
+        }
     }
 
     return (
@@ -67,7 +90,7 @@ export default function PostEditor({ post }: { post?: any }) {
                 <h1 className="text-3xl font-bold tracking-tight text-gray-900">{post ? "Edit Post" : "New Post"}</h1>
                 <div className="flex gap-2">
                     <Button variant="outline" onClick={() => router.back()}>Cancel</Button>
-                    <Button onClick={handleSubmit}>Save</Button>
+                    <Button onClick={handleSubmit} disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
                 </div>
             </div>
 
